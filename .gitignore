@@ -45,3 +45,6 @@ coverage.xml
 deb_dist
 pep8.out
 pylint.out
+.idea
+Pipfile
+Pipfile.lock
