@@ -19,6 +19,14 @@
                     <xsl:attribute name="http-equiv">content-type</xsl:attribute>
                     <xsl:attribute name="content">text/html; charset=utf-8</xsl:attribute>
                 </xsl:element>
+                <xsl:element name="meta">
+                    <xsl:attribute name="http-equiv">X-UA-Compatible</xsl:attribute>
+                    <xsl:attribute name="content">IE=edge</xsl:attribute>
+                </xsl:element>
+                <xsl:element name="meta">
+                    <xsl:attribute name="name">viewport</xsl:attribute>
+                    <xsl:attribute name="content">width=device-width,initial-scale=1</xsl:attribute>
+                </xsl:element>
                 <xsl:apply-templates select="HwpSummaryInfo" mode="head" />
                 <xsl:apply-templates select="DocInfo" mode="head" />
                 <xsl:element name="style">
