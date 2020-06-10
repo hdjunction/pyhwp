@@ -53,59 +53,55 @@ RESOURCE_PATH_XSL_XHTML = 'xsl/hwp5html.xsl'
 
 class HTMLTransform(BaseTransform):
 
-    @property
-    def transform_hwp5_to_css(self):
+    def transform_hwp5_to_css(self, hwp5file, outdir, **params):
         '''
-        >>> T.transform_hwp5_to_css(hwp5file, 'styles.css')
+        >>> T.transform_hwp5_to_css(hwp5file, 'styles.css', **{})
         '''
-        transform_xhwp5 = self.transform_xhwp5_to_css
-        return self.make_transform_hwp5(transform_xhwp5)
+        transform_xhwp5 = self.make_transform_xhwp5_to_css(**params)
+        return self.make_transform_hwp5(transform_xhwp5)(hwp5file, outdir)
 
-    @property
-    def transform_hwp5_to_xhtml(self):
+    def transform_hwp5_to_xhtml(self, hwp5file, outdir, **params):
         '''
-        >>> T.transform_hwp5_to_xhtml(hwp5file, 'index.xhtml')
+        >>> T.transform_hwp5_to_xhtml(hwp5file, 'index.xhtml', **{})
         '''
-        transform_xhwp5 = self.transform_xhwp5_to_xhtml
-        return self.make_transform_hwp5(transform_xhwp5)
+        transform_xhwp5 = self.make_transform_xhwp5_to_xhtml(**params)
+        return self.make_transform_hwp5(transform_xhwp5)(hwp5file, outdir)
 
-    def transform_hwp5_to_dir(self, hwp5file, outdir):
+    def transform_hwp5_to_dir(self, hwp5file, outdir, **params):
         '''
-        >>> T.transform_hwp5_to_dir(hwp5file, 'output')
+        >>> T.transform_hwp5_to_dir(hwp5file, 'output', **{})
         '''
         with self.transformed_xhwp5_at_temp(hwp5file) as xhwp5path:
-            self.transform_xhwp5_to_dir(xhwp5path, outdir)
+            self.transform_xhwp5_to_dir(xhwp5path, outdir, **params)
 
         bindata_dir = os.path.join(outdir, 'bindata')
         self.extract_bindata_dir(hwp5file, bindata_dir)
 
-    @cached_property
-    def transform_xhwp5_to_css(self):
+    def make_transform_xhwp5_to_css(self, **params):
         '''
-        >>> T.transform_xhwp5_to_css('hwp5.xml', 'styles.css')
+        >>> T.make_transform_xhwp5_to_css(**{})('hwp5.xml', 'styles.css')
         '''
         resource_path = RESOURCE_PATH_XSL_CSS
-        return self.make_xsl_transform(resource_path)
+        return self.make_xsl_transform(resource_path, **params)
 
-    @cached_property
-    def transform_xhwp5_to_xhtml(self):
+    def make_transform_xhwp5_to_xhtml(self, **params):
         '''
-        >>> T.transform_xhwp5_to_xhtml('hwp5.xml', 'index.xhtml')
+        >>> T.make_transform_xhwp5_to_xhtml(**{})('hwp5.xml', 'index.xhtml')
         '''
         resource_path = RESOURCE_PATH_XSL_XHTML
-        return self.make_xsl_transform(resource_path)
+        return self.make_xsl_transform(resource_path, **params)
 
-    def transform_xhwp5_to_dir(self, xhwp5path, outdir):
+    def transform_xhwp5_to_dir(self, xhwp5path, outdir, **params):
         '''
-        >>> T.transform_xhwp5_to_dir('hwp5.xml', 'output')
+        >>> T.transform_xhwp5_to_dir('hwp5.xml', 'output', **{})
         '''
         html_path = os.path.join(outdir, 'index.xhtml')
         with io.open(html_path, 'wb') as f:
-            self.transform_xhwp5_to_xhtml(xhwp5path, f)
-
-        css_path = os.path.join(outdir, 'styles.css')
-        with io.open(css_path, 'wb') as f:
-            self.transform_xhwp5_to_css(xhwp5path, f)
+            self.make_transform_xhwp5_to_xhtml(**params)(xhwp5path, f)
+        if params['embed-styles-css'] is '0':
+            css_path = os.path.join(outdir, 'styles.css')
+            with io.open(css_path, 'wb') as f:
+                self.make_transform_xhwp5_to_css(**params)(xhwp5path, f)
 
     def extract_bindata_dir(self, hwp5file, bindata_dir):
         if 'BinData' not in hwp5file:
@@ -133,23 +129,26 @@ def main():
     html_transform = HTMLTransform()
 
     open_dest = make_open_dest_file(args.output)
+    params = {}
     if args.css:
         transform = html_transform.transform_hwp5_to_css
         open_dest = wrap_for_css(open_dest)
     elif args.html:
         transform = html_transform.transform_hwp5_to_xhtml
         open_dest = wrap_for_xml(open_dest)
+        params['embed-styles-css'] = '1' if args.embed_styles_css else '0'
     else:
         transform = html_transform.transform_hwp5_to_dir
         dest_path = args.output
         if not dest_path:
             dest_path = os.path.splitext(os.path.basename(hwp5path))[0]
         open_dest = partial(open_dir, dest_path)
+        params['embed-styles-css'] = '1' if args.embed_styles_css else '0'
 
     try:
         with closing(Hwp5File(hwp5path)) as hwp5file:
             with open_dest() as dest:
-                transform(hwp5file, dest)
+                transform(hwp5file, dest, **params)
     except ParseError as e:
         e.print_to_logger(logger)
     except InvalidHwp5FileError as e:
@@ -178,6 +177,11 @@ def main_argparser():
     parser.add_argument(
         '--output',
         help=_('Output file'),
+    )
+    parser.add_argument(
+        '--embed-styles-css',
+        action='store_true',
+        help=_('Embed styles in output .html'),
     )
     parser.add_argument(
         'hwp5file',
