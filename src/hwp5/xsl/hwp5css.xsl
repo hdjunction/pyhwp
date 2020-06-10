@@ -2,7 +2,12 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:import href="hwp5css-common.xsl" />
     <xsl:output method="text" media-type="text/css" encoding="utf-8" indent="no" />
+
     <xsl:template match="/">
+        <xsl:apply-templates select="/" mode="css-rule" />
+    </xsl:template>
+
+    <xsl:template match="/" mode="css-rule">
         <xsl:call-template name="css-rule">
             <xsl:with-param name="selector">@page</xsl:with-param>
             <xsl:with-param name="declarations">
