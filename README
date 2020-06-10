@@ -14,6 +14,10 @@ Installation
 
 from `pypi <http://pypi.org/project/pyhwp>`_::
 
+   pipenv install pyhwp  # Install pyhwp into a virtualenv directory with pipenv
+
+Or::
+
    virtualenv pyhwp
    pyhwp/bin/pip install --pre pyhwp  # Install pyhwp into a virtualenv directory
 
