@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:import href="hwp5css.xsl" />
-    <xsl:output method="xml" encoding="utf-8" indent="no"
-        doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-        doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
-    />
+    <xsl:output method="html" version="5" encoding="utf-8" indent="no" />
 
     <xsl:param name="embed-styles-css" select="0" />
 
@@ -23,8 +20,7 @@
             <xsl:element name="head">
                 <xsl:text>&#10;</xsl:text>
                 <xsl:element name="meta">
-                    <xsl:attribute name="http-equiv">content-type</xsl:attribute>
-                    <xsl:attribute name="content">text/html; charset=utf-8</xsl:attribute>
+                    <xsl:attribute name="charset">utf-8</xsl:attribute>
                 </xsl:element>
                 <xsl:element name="meta">
                     <xsl:attribute name="http-equiv">X-UA-Compatible</xsl:attribute>

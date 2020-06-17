@@ -48,7 +48,7 @@ else:
 
 
 RESOURCE_PATH_XSL_CSS = 'xsl/hwp5css.xsl'
-RESOURCE_PATH_XSL_XHTML = 'xsl/hwp5html.xsl'
+RESOURCE_PATH_XSL_HTML = 'xsl/hwp5html.xsl'
 
 
 class HTMLTransform(BaseTransform):
@@ -60,11 +60,11 @@ class HTMLTransform(BaseTransform):
         transform_xhwp5 = self.make_transform_xhwp5_to_css(**params)
         return self.make_transform_hwp5(transform_xhwp5)(hwp5file, outdir)
 
-    def transform_hwp5_to_xhtml(self, hwp5file, outdir, **params):
+    def transform_hwp5_to_html(self, hwp5file, outdir, **params):
         '''
-        >>> T.transform_hwp5_to_xhtml(hwp5file, 'index.xhtml', **{})
+        >>> T.transform_hwp5_to_html(hwp5file, 'index.html', **{})
         '''
-        transform_xhwp5 = self.make_transform_xhwp5_to_xhtml(**params)
+        transform_xhwp5 = self.make_transform_xhwp5_to_html(**params)
         return self.make_transform_hwp5(transform_xhwp5)(hwp5file, outdir)
 
     def transform_hwp5_to_dir(self, hwp5file, outdir, **params):
@@ -84,20 +84,20 @@ class HTMLTransform(BaseTransform):
         resource_path = RESOURCE_PATH_XSL_CSS
         return self.make_xsl_transform(resource_path, **params)
 
-    def make_transform_xhwp5_to_xhtml(self, **params):
+    def make_transform_xhwp5_to_html(self, **params):
         '''
-        >>> T.make_transform_xhwp5_to_xhtml(**{})('hwp5.xml', 'index.xhtml')
+        >>> T.make_transform_xhwp5_to_html(**{})('hwp5.xml', 'index.html')
         '''
-        resource_path = RESOURCE_PATH_XSL_XHTML
+        resource_path = RESOURCE_PATH_XSL_HTML
         return self.make_xsl_transform(resource_path, **params)
 
     def transform_xhwp5_to_dir(self, xhwp5path, outdir, **params):
         '''
         >>> T.transform_xhwp5_to_dir('hwp5.xml', 'output', **{})
         '''
-        html_path = os.path.join(outdir, 'index.xhtml')
+        html_path = os.path.join(outdir, 'index.html')
         with io.open(html_path, 'wb') as f:
-            self.make_transform_xhwp5_to_xhtml(**params)(xhwp5path, f)
+            self.make_transform_xhwp5_to_html(**params)(xhwp5path, f)
         if params['embed-styles-css'] is '0':
             css_path = os.path.join(outdir, 'styles.css')
             with io.open(css_path, 'wb') as f:
@@ -142,7 +142,7 @@ def main():
         transform = html_transform.transform_hwp5_to_css
         open_dest = wrap_for_css(open_dest)
     elif args.html:
-        transform = html_transform.transform_hwp5_to_xhtml
+        transform = html_transform.transform_hwp5_to_html
         open_dest = wrap_for_xml(open_dest)
         params['embed-styles-css'] = '1' if args.embed_styles_css else '0'
     else:

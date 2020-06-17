@@ -228,7 +228,7 @@ def make_temporary_directory(*args, **kwargs):
 def hwp5html(filename, out_dir):
     with closing(Hwp5File(filename)) as hwp5file:
         HTMLTransform().transform_hwp5_to_dir(hwp5file, out_dir)
-        yield os.path.join(out_dir, 'index.xhtml')
+        yield os.path.join(out_dir, 'index.html')
 
 
 def fspath2url(path):

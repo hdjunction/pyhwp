@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="xml" encoding="utf-8" indent="yes"
-        doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-        doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
-    />
+    <xsl:output method="html" version="5" encoding="utf-8" indent="no" />
     <xsl:template match="/binspec">
         <xsl:element name="html">
             <xsl:element name="head">
                 <xsl:element name="meta">
-                    <xsl:attribute name="http-equiv">Content-Type</xsl:attribute>
-                    <xsl:attribute name="content">text/xhtml; charset=utf-8</xsl:attribute>
+                    <xsl:attribute name="charset">utf-8</xsl:attribute>
                 </xsl:element>
                 <xsl:element name="meta">
                     <xsl:attribute name="http-equiv">X-UA-Compatible</xsl:attribute>
