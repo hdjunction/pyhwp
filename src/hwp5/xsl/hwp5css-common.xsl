@@ -22,47 +22,52 @@
     </xsl:template>
 
     <xsl:template match="Style" mode="css-rule">
-        <xsl:variable name="paragraph-selector">
-            <xsl:text>.</xsl:text>
+        <xsl:variable name="paragraph-class-name">
             <xsl:value-of select="translate(@name, ' ', '-')"/>
         </xsl:variable>
-        <xsl:variable name="spans-selector">
-            <xsl:value-of select="$paragraph-selector" />
-            <xsl:text> &gt; </xsl:text>
-            <xsl:text>span</xsl:text>
-        </xsl:variable>
-        <xsl:if test="@kind = 'paragraph'">
-            <xsl:variable name="parashape_pos" select="@parashape-id + 1" />
-            <xsl:variable name="parashape" select="//ParaShape[$parashape_pos]" />
-            <xsl:call-template name="css-rule">
-                <xsl:with-param name="selector" select="$paragraph-selector" />
-                <xsl:with-param name="declarations">
-                    <xsl:text>/* </xsl:text>
-                    <xsl:text>@parashape-id = </xsl:text>
-                    <xsl:value-of select="@parashape-id" />
-                    <xsl:text>*/&#10;</xsl:text>
-                    <xsl:apply-templates select="$parashape" mode="css-declaration" />
-                </xsl:with-param>
-            </xsl:call-template>
-            <xsl:call-template name="css-rule">
-                <xsl:with-param name="selector" select="$spans-selector" />
-                <xsl:with-param name="declarations">
-                    <xsl:apply-templates select="$parashape" mode="css-declaration-for-span" />
-                </xsl:with-param>
-            </xsl:call-template>
-        </xsl:if>
+        <xsl:if test="$paragraph-class-name != ''">
+            <xsl:variable name="paragraph-selector">
+                <xsl:text>.</xsl:text>
+                <xsl:value-of select="$paragraph-class-name"/>
+            </xsl:variable>
+            <xsl:variable name="spans-selector">
+                <xsl:value-of select="$paragraph-selector" />
+                <xsl:text> &gt; </xsl:text>
+                <xsl:text>span</xsl:text>
+            </xsl:variable>
+            <xsl:if test="@kind = 'paragraph'">
+                <xsl:variable name="parashape_pos" select="@parashape-id + 1" />
+                <xsl:variable name="parashape" select="//ParaShape[$parashape_pos]" />
+                <xsl:call-template name="css-rule">
+                    <xsl:with-param name="selector" select="$paragraph-selector" />
+                    <xsl:with-param name="declarations">
+                        <xsl:text>/* </xsl:text>
+                        <xsl:text>@parashape-id = </xsl:text>
+                        <xsl:value-of select="@parashape-id" />
+                        <xsl:text>*/&#10;</xsl:text>
+                        <xsl:apply-templates select="$parashape" mode="css-declaration" />
+                    </xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="css-rule">
+                    <xsl:with-param name="selector" select="$spans-selector" />
+                    <xsl:with-param name="declarations">
+                        <xsl:apply-templates select="$parashape" mode="css-declaration-for-span" />
+                    </xsl:with-param>
+                </xsl:call-template>
+            </xsl:if>
 
-        <xsl:text>/* </xsl:text>
-        <xsl:text>@charshape-id = </xsl:text>
-        <xsl:value-of select="@charshape-id" />
-        <xsl:text>*/&#10;</xsl:text>
-        <xsl:variable name="charshape_pos" select="number(@charshape-id) + 1" />
-        <xsl:variable name="charshape" select="//CharShape[$charshape_pos]" />
-        <xsl:for-each select="$charshape">
-            <xsl:call-template name="charshape-css-rule">
-                <xsl:with-param name="charshape-selector" select="$spans-selector" />
-            </xsl:call-template>
-        </xsl:for-each>
+            <xsl:text>/* </xsl:text>
+            <xsl:text>@charshape-id = </xsl:text>
+            <xsl:value-of select="@charshape-id" />
+            <xsl:text>*/&#10;</xsl:text>
+            <xsl:variable name="charshape_pos" select="number(@charshape-id) + 1" />
+            <xsl:variable name="charshape" select="//CharShape[$charshape_pos]" />
+            <xsl:for-each select="$charshape">
+                <xsl:call-template name="charshape-css-rule">
+                    <xsl:with-param name="charshape-selector" select="$spans-selector" />
+                </xsl:call-template>
+            </xsl:for-each>
+        </xsl:if>
     </xsl:template>
 
     <xsl:template match="ParaShape" mode="css-rule">
