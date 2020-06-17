@@ -4,6 +4,15 @@
     <xsl:output method="text" media-type="text/css" encoding="utf-8" indent="no" />
     <xsl:template match="/">
         <xsl:call-template name="css-rule">
+            <xsl:with-param name="selector">@page</xsl:with-param>
+            <xsl:with-param name="declarations">
+                <xsl:call-template name="css-declaration">
+                    <xsl:with-param name="property">margin</xsl:with-param>
+                    <xsl:with-param name="value">0</xsl:with-param>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
+        <xsl:call-template name="css-rule">
             <xsl:with-param name="selector">body</xsl:with-param>
             <xsl:with-param name="declarations">
                 <xsl:call-template name="css-declaration">
