@@ -125,11 +125,19 @@ def main():
     init_logger(args)
 
     hwp5path = args.hwp5file
+    font_face = args.font_face + [''] * (5 - len(args.font_face))
 
     html_transform = HTMLTransform()
 
     open_dest = make_open_dest_file(args.output)
-    params = {}
+    params = {
+        'sans-serif': font_face[0],
+        'serif': font_face[1],
+        'monospace': font_face[2],
+        'cursive': font_face[3],
+        'fantasy': font_face[4],
+        'use-only-fallback-font': '1' if args.use_only_fallback_font else '0',
+    }
     if args.css:
         transform = html_transform.transform_hwp5_to_css
         open_dest = wrap_for_css(open_dest)
@@ -173,6 +181,17 @@ def main_argparser():
     parser.add_argument(
         '--logfile',
         help=_('Set log file.'),
+    )
+    parser.add_argument(
+        '--font-face',
+        nargs='+',
+        default=[],
+        help=_(f'Set fonts.{os.linesep}[----font-face sans-serif [serif monospace cursive fantasy]]'),
+    )
+    parser.add_argument(
+        '--use-only-fallback-font',
+        action='store_true',
+        help=_(f'Set all font-family as fallback fonts.'),
     )
     parser.add_argument(
         '--output',
