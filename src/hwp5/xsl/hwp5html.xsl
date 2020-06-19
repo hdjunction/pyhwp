@@ -13,6 +13,11 @@
     </xsl:template>
 
     <xsl:template match="HwpDoc" mode="html">
+        <xsl:variable name="HwpDoc-css-rules">
+            <xsl:apply-templates select="BodyText/SectionDef" mode="css-rule" />
+            <xsl:apply-templates select="//Header" mode="css-rule" />
+            <xsl:apply-templates select="//Footer" mode="css-rule" />
+        </xsl:variable>
         <xsl:element name="html">
             <xsl:element name="head">
                 <xsl:element name="meta">
@@ -31,10 +36,9 @@
                 <xsl:apply-templates select="DocInfo" mode="head" />
                 <xsl:element name="style">
                     <xsl:attribute name="type">text/css</xsl:attribute>
-                    <xsl:text>&#10;</xsl:text>
-                    <xsl:apply-templates select="BodyText/SectionDef" mode="css-rule" />
-                    <xsl:apply-templates select="//Header" mode="css-rule" />
-                    <xsl:apply-templates select="//Footer" mode="css-rule" />
+                    <xsl:text disable-output-escaping="yes">/*&lt;![CDATA[*/&#10;</xsl:text>
+                    <xsl:value-of select="$HwpDoc-css-rules" disable-output-escaping="yes" />
+                    <xsl:text disable-output-escaping="yes">/*]]&gt;*/</xsl:text>
                 </xsl:element>
             </xsl:element>
             <xsl:apply-templates select="BodyText" mode="body" />
@@ -63,9 +67,14 @@
     </xsl:template>
 
     <xsl:template match="IdMappings" mode="style">
+        <xsl:variable name="IdMappings-css-rules">
+            <xsl:apply-templates select="/" mode="css-rule" />
+        </xsl:variable>
         <xsl:element name="style">
             <xsl:attribute name="type">text/css</xsl:attribute>
-            <xsl:apply-templates select="/" mode="css-rule" />
+            <xsl:text disable-output-escaping="yes">/*&lt;![CDATA[*/&#10;</xsl:text>
+            <xsl:value-of select="$IdMappings-css-rules" disable-output-escaping="yes" />
+            <xsl:text disable-output-escaping="yes">/*]]&gt;*/</xsl:text>
         </xsl:element>
     </xsl:template>
 
@@ -119,19 +128,22 @@
             <xsl:variable name="stylencname" select="translate($stylename, ' ', '-')" />
             <xsl:variable name="parashape_pos" select="number(@parashape-id) + 1" />
             <xsl:variable name="parashape" select="//ParaShape[$parashape_pos]" />
-            <xsl:attribute name="class">
+            <xsl:variable name="class">
                 <xsl:value-of select="$stylencname" />
+                <xsl:text> </xsl:text>
                 <xsl:choose>
                     <xsl:when test="$style/@parashape-id = @parashape-id">
                         <xsl:apply-templates select="$style" mode="add-class-bullet" />
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:text> </xsl:text>
                         <xsl:text>parashape-</xsl:text>
                         <xsl:value-of select="@parashape-id"/>
                         <xsl:apply-templates select="." mode="add-class-bullet" />
                     </xsl:otherwise>
                 </xsl:choose>
+            </xsl:variable>
+            <xsl:attribute name="class">
+                <xsl:value-of select="normalize-space($class)" />
             </xsl:attribute>
             <xsl:for-each select="LineSeg">
                 <xsl:apply-templates select="Text|ControlChar|AutoNumbering|TableControl[@inline='1']|GShapeObjectControl[@inline='1']" />
@@ -141,7 +153,9 @@
         <xsl:apply-templates select="LineSeg/GShapeObjectControl[@inline='0']" />
     </xsl:template>
 
-    <xsl:template match="ControlChar"><xsl:value-of select="@char"/></xsl:template>
+    <xsl:template match="ControlChar">
+        <xsl:value-of select="translate(translate(@char, '&#10;', ''), '&#13;', '')"/>
+    </xsl:template>
 
     <xsl:template match="Paragraph/LineSeg/Text">
         <xsl:element name="span">
@@ -180,19 +194,25 @@
     </xsl:template>
 
     <xsl:template match="TableControl[@inline='1']">
+        <xsl:variable name="TableControl-inline1-style">
+            <xsl:apply-templates select="." mode="css-display" />
+        </xsl:variable>
+        <xsl:variable name="TableControl-inline1-table-style">
+            <xsl:apply-templates select="." mode="css-width" />
+            <xsl:apply-templates select="." mode="table-border" />
+        </xsl:variable>
         <xsl:element name="span">
             <xsl:attribute name="class">
                 <xsl:text>TableControl</xsl:text>
             </xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:apply-templates select="." mode="css-display" />
+                <xsl:value-of select="normalize-space($TableControl-inline1-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:element name="table">
                 <xsl:attribute name="class">borderfill-<xsl:value-of select="TableBody/@borderfill-id"/></xsl:attribute>
                 <xsl:attribute name="cellspacing"><xsl:value-of select="TableBody/@cellspacing"/></xsl:attribute>
                 <xsl:attribute name="style">
-                    <xsl:apply-templates select="." mode="css-width" />
-                    <xsl:apply-templates select="." mode="table-border" />
+                    <xsl:value-of select="normalize-space($TableControl-inline1-table-style)" disable-output-escaping="yes" />
                 </xsl:attribute>
                 <xsl:apply-templates />
             </xsl:element>
@@ -200,6 +220,11 @@
     </xsl:template>
 
     <xsl:template match="TableControl[@inline='0']">
+        <xsl:variable name="TableControl-inline0-style">
+            <xsl:apply-templates select="." mode="css-width" />
+            <xsl:apply-templates select="." mode="extendedcontrol-hpos" />
+            <xsl:apply-templates select="." mode="table-border" />
+        </xsl:variable>
         <xsl:element name="table">
             <xsl:attribute name="class">
                 <xsl:text>TableControl</xsl:text>
@@ -209,9 +234,7 @@
             </xsl:attribute>
             <xsl:attribute name="cellspacing"><xsl:value-of select="TableBody/@cellspacing"/></xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:apply-templates select="." mode="css-width" />
-                <xsl:apply-templates select="." mode="extendedcontrol-hpos" />
-                <xsl:apply-templates select="." mode="table-border" />
+                <xsl:value-of select="normalize-space($TableControl-inline0-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:apply-templates />
         </xsl:element>
@@ -225,61 +248,64 @@
     </xsl:template>
 
     <xsl:template match="TableCaption">
+        <xsl:variable name="TableCaption-style">
+            <xsl:choose>
+                <xsl:when test="@position = 'top'">
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">caption-side</xsl:with-param>
+                        <xsl:with-param name="value" select="@position" />
+                    </xsl:call-template>
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">margin-bottom</xsl:with-param>
+                        <xsl:with-param name="value">
+                            <xsl:call-template name="hwpunit-to-mm">
+                                <xsl:with-param name="hwpunit" select="@separation" />
+                            </xsl:call-template>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">width</xsl:with-param>
+                        <xsl:with-param name="value">
+                            <xsl:call-template name="hwpunit-to-mm">
+                                <xsl:with-param name="hwpunit" select="@width" />
+                            </xsl:call-template>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </xsl:when>
+                <xsl:when test="@position = 'bottom'">
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">caption-side</xsl:with-param>
+                        <xsl:with-param name="value" select="@position" />
+                    </xsl:call-template>
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">margin-top</xsl:with-param>
+                        <xsl:with-param name="value">
+                            <xsl:call-template name="hwpunit-to-mm">
+                                <xsl:with-param name="hwpunit" select="@separation" />
+                            </xsl:call-template>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                    <xsl:call-template name="css-declaration">
+                        <xsl:with-param name="property">width</xsl:with-param>
+                        <xsl:with-param name="value">
+                            <xsl:call-template name="hwpunit-to-mm">
+                                <xsl:with-param name="hwpunit" select="@width" />
+                            </xsl:call-template>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>/* </xsl:text>
+                    <xsl:text>not supported @position: </xsl:text>
+                    <xsl:value-of select="@position" />
+                    <xsl:text> */&#10;</xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:element name="caption">
             <xsl:attribute name="class">TableCaption</xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:choose>
-                    <xsl:when test="@position = 'top'">
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">caption-side</xsl:with-param>
-                            <xsl:with-param name="value" select="@position" />
-                        </xsl:call-template>
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">margin-bottom</xsl:with-param>
-                            <xsl:with-param name="value">
-                                <xsl:call-template name="hwpunit-to-mm">
-                                    <xsl:with-param name="hwpunit" select="@separation" />
-                                </xsl:call-template>
-                            </xsl:with-param>
-                        </xsl:call-template>
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">width</xsl:with-param>
-                            <xsl:with-param name="value">
-                                <xsl:call-template name="hwpunit-to-mm">
-                                    <xsl:with-param name="hwpunit" select="@width" />
-                                </xsl:call-template>
-                            </xsl:with-param>
-                        </xsl:call-template>
-                    </xsl:when>
-                    <xsl:when test="@position = 'bottom'">
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">caption-side</xsl:with-param>
-                            <xsl:with-param name="value" select="@position" />
-                        </xsl:call-template>
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">margin-top</xsl:with-param>
-                            <xsl:with-param name="value">
-                                <xsl:call-template name="hwpunit-to-mm">
-                                    <xsl:with-param name="hwpunit" select="@separation" />
-                                </xsl:call-template>
-                            </xsl:with-param>
-                        </xsl:call-template>
-                        <xsl:call-template name="css-declaration">
-                            <xsl:with-param name="property">width</xsl:with-param>
-                            <xsl:with-param name="value">
-                                <xsl:call-template name="hwpunit-to-mm">
-                                    <xsl:with-param name="hwpunit" select="@width" />
-                                </xsl:call-template>
-                            </xsl:with-param>
-                        </xsl:call-template>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:text>/* </xsl:text>
-                        <xsl:text>not supported @position: </xsl:text>
-                        <xsl:value-of select="@position" />
-                        <xsl:text> */&#10;</xsl:text>
-                    </xsl:otherwise>
-                </xsl:choose>
+                <xsl:value-of select="normalize-space($TableCaption-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:apply-templates />
         </xsl:element>
@@ -292,45 +318,48 @@
     </xsl:template>
 
     <xsl:template match="TableCell">
+        <xsl:variable name="TableCell-style">
+            <xsl:call-template name="css-declaration">
+                <xsl:with-param name="property">width</xsl:with-param>
+                <xsl:with-param name="value">
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@width" />
+                    </xsl:call-template>
+                </xsl:with-param>
+            </xsl:call-template>
+            <xsl:call-template name="css-declaration">
+                <xsl:with-param name="property">height</xsl:with-param>
+                <xsl:with-param name="value">
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@height" />
+                    </xsl:call-template>
+                </xsl:with-param>
+            </xsl:call-template>
+            <xsl:call-template name="css-declaration">
+                <xsl:with-param name="property">padding</xsl:with-param>
+                <xsl:with-param name="value">
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@padding-top" />
+                    </xsl:call-template>
+                    <xsl:text> </xsl:text>
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@padding-right" />
+                    </xsl:call-template>
+                    <xsl:text> </xsl:text>
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@padding-bottom" />
+                    </xsl:call-template>
+                    <xsl:text> </xsl:text>
+                    <xsl:call-template name="hwpunit-to-mm">
+                        <xsl:with-param name="hwpunit" select="@padding-left" />
+                    </xsl:call-template>
+                </xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:element name="td">
             <xsl:attribute name="class">borderfill-<xsl:value-of select="@borderfill-id"/></xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:call-template name="css-declaration">
-                    <xsl:with-param name="property">width</xsl:with-param>
-                    <xsl:with-param name="value">
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@width" />
-                        </xsl:call-template>
-                    </xsl:with-param>
-                </xsl:call-template>
-                <xsl:call-template name="css-declaration">
-                    <xsl:with-param name="property">height</xsl:with-param>
-                    <xsl:with-param name="value">
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@height" />
-                        </xsl:call-template>
-                    </xsl:with-param>
-                </xsl:call-template>
-                <xsl:call-template name="css-declaration">
-                    <xsl:with-param name="property">padding</xsl:with-param>
-                    <xsl:with-param name="value">
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@padding-top" />
-                        </xsl:call-template>
-                        <xsl:text> </xsl:text>
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@padding-right" />
-                        </xsl:call-template>
-                        <xsl:text> </xsl:text>
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@padding-bottom" />
-                        </xsl:call-template>
-                        <xsl:text> </xsl:text>
-                        <xsl:call-template name="hwpunit-to-mm">
-                            <xsl:with-param name="hwpunit" select="@padding-left" />
-                        </xsl:call-template>
-                    </xsl:with-param>
-                </xsl:call-template>
+                <xsl:value-of select="normalize-space($TableCell-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:attribute name="rowspan"><xsl:value-of select="@rowspan"/></xsl:attribute>
             <xsl:attribute name="colspan"><xsl:value-of select="@colspan"/></xsl:attribute>
@@ -339,36 +368,45 @@
     </xsl:template>
 
     <xsl:template match="GShapeObjectControl[@inline='1']">
+        <xsl:variable name="GShapeObjectControl-inline1-style">
+            <xsl:apply-templates select="." mode="css-width" />
+            <xsl:apply-templates select="." mode="css-display" />
+        </xsl:variable>
         <xsl:element name="span">
             <xsl:attribute name="class">GShapeObjectControl</xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:apply-templates select="." mode="css-width" />
-                <xsl:apply-templates select="." mode="css-display" />
+                <xsl:value-of select="normalize-space($GShapeObjectControl-inline1-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:apply-templates />
         </xsl:element>
     </xsl:template>
 
     <xsl:template match="GShapeObjectControl[@inline='0']">
+        <xsl:variable name="GShapeObjectControl-inline0-style">
+            <xsl:apply-templates select="." mode="css-width" />
+            <xsl:apply-templates select="." mode="extendedcontrol-hpos" />
+        </xsl:variable>
         <xsl:element name="div">
             <xsl:attribute name="class">GShapeObjectControl</xsl:attribute>
             <xsl:attribute name="style">
-                <xsl:apply-templates select="." mode="css-width" />
-                <xsl:apply-templates select="." mode="extendedcontrol-hpos" />
+                <xsl:value-of select="normalize-space($GShapeObjectControl-inline0-style)" disable-output-escaping="yes" />
             </xsl:attribute>
             <xsl:apply-templates />
         </xsl:element>
     </xsl:template>
 
     <xsl:template match="ShapePicture">
+        <xsl:variable name="ShapePicture-style">
+            <xsl:apply-templates select=".." mode="css-width" />
+            <xsl:text> </xsl:text>
+            <xsl:apply-templates select=".." mode="css-height" />
+        </xsl:variable>
         <xsl:variable name="bindataid" select="PictureInfo/@bindata-id"/>
         <xsl:variable name="bindata" select="/HwpDoc/DocInfo/IdMappings/BinData[number($bindataid)]"/>
         <xsl:element name="img">
             <xsl:apply-templates select="$bindata" mode="img-src"/>
             <xsl:attribute name="style">
-                <xsl:apply-templates select=".." mode="css-width" />
-                <xsl:text> </xsl:text>
-                <xsl:apply-templates select=".." mode="css-height" />
+                <xsl:value-of select="normalize-space($ShapePicture-style)" disable-output-escaping="yes" />
             </xsl:attribute>
         </xsl:element>
     </xsl:template>

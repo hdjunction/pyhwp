@@ -22,18 +22,21 @@
                 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
                 <xsl:element name="script">
                     <xsl:attribute name="type">text/javascript</xsl:attribute>
-                    <xsl:text>
+                    <xsl:text disable-output-escaping="yes">
+/*&lt;![CDATA[*
 $(document).ready(function(){
   $('a.toggle-definition').parent().parent().siblings().css('display', 'none');
   $('a.toggle-definition').click(function(){
     $(this).parent().parent().siblings().toggle();
   });
 });
+/*]]&gt;*/
                     </xsl:text>
                 </xsl:element>
                 <xsl:element name="style">
                     <xsl:attribute name="type">text/css</xsl:attribute>
-                    <xsl:text>
+                    <xsl:text disable-output-escaping="yes">
+/*&lt;![CDATA[*
 table.StructType {
   width: 100%;
 }
@@ -85,6 +88,7 @@ a.toggle-definition {
   cursor: pointer;
   color: blue;
 }
+/*]]&gt;*/
                     </xsl:text>
                 </xsl:element>
             </xsl:element>
