@@ -873,7 +873,7 @@
     </xsl:template>
 
     <xsl:template match="Paragraph">
-        <xsl:element name="text:p">
+        <xsl:element name="text:div">
             <xsl:variable name="style-id" select="@style-id + 1" />
             <xsl:variable name="style" select="/HwpDoc/DocInfo/IdMappings/Style[$style-id]"/>
             <xsl:variable name="style-parashape-id" select="$style/@parashape-id + 1"/>

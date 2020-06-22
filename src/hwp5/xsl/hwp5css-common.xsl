@@ -116,7 +116,7 @@
 
     <xsl:template match="ParaShape" mode="css-rule">
         <xsl:variable name="paragraph-selector">
-            <xsl:text>p.parashape-</xsl:text>
+            <xsl:text>html .parashape-</xsl:text>
             <xsl:number value="position()-1" />
         </xsl:variable>
         <xsl:variable name="spans-selector">
@@ -165,23 +165,9 @@
         <xsl:choose>
             <xsl:when test="@linespacing-type = 'ratio'">
                 <xsl:call-template name="css-declaration">
-                    <xsl:with-param name="property">min-height</xsl:with-param>
-                    <xsl:with-param name="value">
-                        <xsl:value-of select="@linespacing div 100" />
-                        <xsl:text>em</xsl:text>
-                    </xsl:with-param>
-                </xsl:call-template>
-            </xsl:when>
-        </xsl:choose>
-    </xsl:template>
-
-    <xsl:template match="ParaShape" mode="css-declaration-for-span">
-        <xsl:choose>
-            <xsl:when test="@linespacing-type = 'ratio'">
-                <xsl:call-template name="css-declaration">
                     <xsl:with-param name="property">line-height</xsl:with-param>
                     <xsl:with-param name="value">
-                        <xsl:value-of select="@linespacing div 100"/>
+                        <xsl:value-of select="@linespacing div 100" />
                     </xsl:with-param>
                 </xsl:call-template>
             </xsl:when>
@@ -264,7 +250,7 @@
     <xsl:template match="CharShape" mode="css-rule">
 
         <xsl:variable name="charshape-selector">
-            <xsl:text>span.charshape-</xsl:text>
+            <xsl:text>html .charshape-</xsl:text>
             <xsl:number value="position()-1" />
         </xsl:variable>
 
